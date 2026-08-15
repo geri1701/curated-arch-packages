@@ -1,0 +1,46 @@
+# Maintainer: Gerhard Schwanzer <geri@sdf.org>
+
+pkgname=xwaylandvideobridge
+pkgver=0.5.1
+pkgrel=2
+pkgdesc='Utility to allow streaming Wayland windows to X applications'
+arch=('x86_64')
+url='https://invent.kde.org/system/xwaylandvideobridge'
+license=('LicenseRef-scancode-kde-accepted-gpl AND LGPL-2.0-or-later AND BSD-3-Clause')
+depends=(
+  'gcc-libs'
+  'glibc'
+  'hicolor-icon-theme'
+  'kcoreaddons'
+  'kcrash'
+  'ki18n'
+  'kpipewire'
+  'kstatusnotifieritem'
+  'kwindowsystem'
+  'libxcb'
+  'qt6-base'
+  'qt6-declarative'
+)
+makedepends=('extra-cmake-modules')
+options=('!debug')
+source=(
+  "$pkgname-$pkgver.tar.gz::$url/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz"
+)
+sha256sums=('aa27f9679ab22fecaa790b10c9845b15a9deb60b9826fa34b1d6033f05b2fa1f')
+
+build() {
+  cmake -B build -S "$pkgname-v$pkgver" \
+    -DBUILD_TESTING=OFF
+  cmake --build build
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+
+  install -Dm644 \
+    "$pkgname-v$pkgver/LICENSES/LicenseRef-KDE-Accepted-GPL.txt" \
+    "$pkgdir/usr/share/licenses/$pkgname/LicenseRef-scancode-kde-accepted-gpl.txt"
+  install -Dm644 \
+    "$pkgname-v$pkgver/LICENSES/BSD-3-Clause.txt" \
+    "$pkgdir/usr/share/licenses/$pkgname/BSD-3-Clause.txt"
+}

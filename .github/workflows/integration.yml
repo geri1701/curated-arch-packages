@@ -1,0 +1,79 @@
+name: Test Paru installation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ARCH_IMAGE: archlinux@sha256:b0deabeb3d283da2c7f7dbf0eea051b7b2cd0554e0b737cc457fd21683bdcdd1
+  PARU_COMMIT: 9ac3578807a87858651e81a02586ceb947686e7c
+  PARU_SHA256: fa1e2da402283f9584f98458c61ae8d0bb04c92b2cddb1d2727c8ce944da457e
+
+jobs:
+  install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install curated package and verify read-only AUR search
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            --volume "$PWD:/work:ro" \
+            --tmpfs /build:exec,size=6G \
+            --env PARU_COMMIT \
+            --env PARU_SHA256 \
+            "$ARCH_IMAGE" \
+            bash -euo pipefail -c '
+              pacman -Syu --noconfirm --needed \
+                base-devel cargo curl git sudo
+
+              mkdir /tmp/paru-src
+              curl --fail --location --retry 3 \
+                --output /tmp/paru.tar.gz \
+                "https://github.com/Morganamilo/paru/archive/$PARU_COMMIT.tar.gz"
+              printf "%s  %s\n" "$PARU_SHA256" /tmp/paru.tar.gz \
+                | sha256sum --check
+              tar --extract --gzip --strip-components=1 \
+                --file /tmp/paru.tar.gz --directory /tmp/paru-src
+              cargo build --release --locked --quiet \
+                --manifest-path /tmp/paru-src/Cargo.toml
+              install -Dm755 /tmp/paru-src/target/release/paru \
+                /usr/local/bin/paru
+              install -Dm644 /tmp/paru-src/paru.conf /etc/paru.conf
+
+              useradd --create-home builder
+              printf "builder ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman\n" \
+                > /etc/sudoers.d/builder
+              chmod 0440 /etc/sudoers.d/builder
+
+              cp -a /work /build/repository
+              chown -R builder:builder /build/repository
+              sed "s#^Url = .*#Path = /build/repository#" \
+                /work/config/paru.conf > /build/paru.conf
+              chown builder:builder /build/paru.conf
+
+              su builder -c \
+                "PARU_CONF=/build/paru.conf paru -S --pkgbuilds --noconfirm curated-aur-search"
+              test "$(pacman -Q curated-aur-search)" \
+                = "curated-aur-search 1.0.0-1"
+
+              su builder -c "aur-search google-chrome" \
+                | tee /tmp/aur-search
+              grep -Fq "AUR search only; installation is disabled." \
+                /tmp/aur-search
+              grep -Fq "aur/google-chrome " /tmp/aur-search
+
+              if su builder -c \
+                "PARU_CONF=/build/paru.conf paru --aur -S --noconfirm google-chrome"; then
+                echo "AUR installation unexpectedly succeeded" >&2
+                exit 1
+              fi
+              ! pacman -Q google-chrome 2>/dev/null
+            '

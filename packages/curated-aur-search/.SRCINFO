@@ -1,0 +1,16 @@
+pkgbase = curated-aur-search
+	pkgdesc = Read-only command-line search for AUR package metadata
+	pkgver = 1.0.0
+	pkgrel = 1
+	url = https://github.com/geri1701/curated-arch-packages
+	arch = any
+	license = MIT
+	depends = bash
+	depends = curl
+	depends = jq
+	source = aur-search
+	source = LICENSE
+	sha256sums = aa75a5b17248e1d71655908f22e1459a6198e2372058bb1c69c71fcf3d4791ba
+	sha256sums = 8f0e5f3de9a943dd8295698f5fd4911104c543cacc8dd451f92d47bb769e1d7a
+
+pkgname = curated-aur-search

@@ -1,0 +1,24 @@
+# Maintainer: Gerhard Schwanzer <geri@sdf.org>
+
+pkgname=curated-aur-search
+pkgver=1.0.0
+pkgrel=1
+pkgdesc='Read-only command-line search for AUR package metadata'
+arch=('any')
+url='https://github.com/geri1701/curated-arch-packages'
+license=('MIT')
+depends=('bash' 'curl' 'jq')
+source=('aur-search' 'LICENSE')
+sha256sums=(
+  'aa75a5b17248e1d71655908f22e1459a6198e2372058bb1c69c71fcf3d4791ba'
+  '8f0e5f3de9a943dd8295698f5fd4911104c543cacc8dd451f92d47bb769e1d7a'
+)
+
+check() {
+  bash -n aur-search
+}
+
+package() {
+  install -Dm755 aur-search "$pkgdir/usr/bin/aur-search"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

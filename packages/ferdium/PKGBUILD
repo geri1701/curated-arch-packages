@@ -1,0 +1,78 @@
+# Maintainer: Gerhard Schwanzer <geri@sdf.org>
+
+pkgname=ferdium
+pkgver=7.1.2
+pkgrel=2
+pkgdesc='Messaging app combining multiple services in one application'
+arch=('x86_64')
+url='https://ferdium.org/'
+license=('Apache-2.0')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'dbus'
+  'expat'
+  'gcc-libs'
+  'glib2'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libnotify'
+  'libsecret'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+  'xdg-utils'
+)
+makedepends=('libarchive')
+optdepends=('libayatana-appindicator: tray icon support')
+provides=('ferdium-bin')
+conflicts=(
+  'ferdium-bin'
+  'ferdium-nightly-bin'
+  'ferdium-nightly'
+  'ferdium-beta-bin'
+  'ferdium-beta'
+  'ferdium-git'
+  'ferdium-electron'
+)
+options=('!strip' '!debug')
+source=(
+  "$pkgname-$pkgver.deb::https://github.com/ferdium/ferdium-app/releases/download/v$pkgver/Ferdium-linux-$pkgver-amd64.deb"
+  "LICENSE-$pkgver.md::https://raw.githubusercontent.com/ferdium/ferdium-app/v$pkgver/LICENSE.md"
+)
+noextract=("$pkgname-$pkgver.deb")
+sha256sums=(
+  '38340a16305adab889636e9a3da01f2f3b82c8b624079a184b1204dbc9cc9b06'
+  'd8cce85684984a168ed6d7a4513b7a27b3471a8f0d1efabc1f58faf556c73ac0'
+)
+
+package() {
+  cd "$srcdir"
+
+  bsdtar -xf "$pkgname-$pkgver.deb" data.tar.xz
+  bsdtar -xf data.tar.xz -C "$pkgdir"
+
+  chmod -R u+rwX,go+rX,go-w "$pkgdir/opt/Ferdium"
+  chmod 0755 "$pkgdir/opt/Ferdium/chrome-sandbox"
+
+  install -dm755 "$pkgdir/usr/bin"
+  ln -s /opt/Ferdium/ferdium "$pkgdir/usr/bin/ferdium"
+  sed -i 's|^Exec=.*|Exec=/usr/bin/ferdium %U|' \
+    "$pkgdir/usr/share/applications/ferdium.desktop"
+
+  install -Dm644 "LICENSE-$pkgver.md" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE.md"
+}

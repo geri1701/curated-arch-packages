@@ -1,0 +1,17 @@
+# makepkg output
+**/pkg/
+**/src/
+*.pkg.tar.*
+*.src.tar.*
+
+# downloaded sources and logs
+*.tar
+*.tar.gz
+*.tar.xz
+*.zip
+*.log
+
+# local signing material
+*.key
+*.gpg
+*.asc

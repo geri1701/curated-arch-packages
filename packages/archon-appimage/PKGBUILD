@@ -1,0 +1,84 @@
+# Maintainer: Gerhard Schwanzer <geri@sdf.org>
+
+pkgname=archon-appimage
+_pkgname=archon
+pkgver=9.5.8
+pkgrel=1
+pkgdesc="Desktop uploader app for Archon packaged from the upstream AppImage"
+arch=('x86_64')
+url='https://www.archon.gg/download'
+license=('LicenseRef-proprietary')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'dbus'
+  'expat'
+  'gcc-libs'
+  'glib2'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+  'xdg-utils'
+)
+provides=('archon')
+conflicts=('archon' 'archon-bin')
+options=('!strip' '!debug')
+source=(
+  "$_pkgname-v$pkgver.AppImage::https://github.com/RPGLogs/Uploaders-archon/releases/download/v$pkgver/$_pkgname-v$pkgver.AppImage"
+  'LICENSE'
+)
+noextract=("$_pkgname-v$pkgver.AppImage")
+sha256sums=(
+  'b4431f0cad01081bcd585940efc14a59c3af535c33228ac13386662d0fba8735'
+  'cadbf0f4936c1a5b4497683b59f49f09efd2c7ab6cff3eaf5615b42200ae9b9d'
+)
+
+prepare() {
+  cd "$srcdir"
+  chmod +x "$_pkgname-v$pkgver.AppImage"
+  ./"$_pkgname-v$pkgver.AppImage" --appimage-extract >/dev/null
+}
+
+package() {
+  cd "$srcdir"
+
+  install -dm755 "$pkgdir/opt/$pkgname"
+  cp -a squashfs-root/. "$pkgdir/opt/$pkgname/"
+  rm -rf "$pkgdir/opt/$pkgname"/{AppRun,.DirIcon,"$_pkgname.desktop","$_pkgname.png",usr}
+  chmod -R u+rwX,go+rX,go-w "$pkgdir/opt/$pkgname"
+
+  install -dm755 "$pkgdir/usr/bin"
+  ln -s "/opt/$pkgname/$_pkgname" "$pkgdir/usr/bin/$_pkgname"
+
+  install -Dm644 "squashfs-root/$_pkgname.desktop" \
+    "$pkgdir/usr/share/applications/$_pkgname.desktop"
+  sed -i \
+    -e 's|^Exec=.*|Exec=/usr/bin/archon %U|' \
+    -e 's|^Icon=.*|Icon=archon|' \
+    "$pkgdir/usr/share/applications/$_pkgname.desktop"
+
+  install -Dm644 \
+    "squashfs-root/usr/share/icons/hicolor/512x512/apps/$_pkgname.png" \
+    "$pkgdir/usr/share/icons/hicolor/512x512/apps/$_pkgname.png"
+
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  ln -s "/opt/$pkgname/LICENSE.electron.txt" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE.electron.txt"
+  ln -s "/opt/$pkgname/LICENSES.chromium.html" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSES.chromium.html"
+}

@@ -1,0 +1,139 @@
+#!/usr/bin/env bash
+set -uo pipefail
+
+repo_root=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)
+summary=$(mktemp)
+trap 'rm -f "$summary"' EXIT
+
+for command in curl jq; do
+  if ! command -v "$command" >/dev/null; then
+    printf 'Missing required command: %s\n' "$command" >&2
+    exit 2
+  fi
+done
+
+curl_args=(
+  --fail
+  --silent
+  --show-error
+  --location
+  --retry 2
+  --connect-timeout 10
+  --max-time 30
+  --header 'User-Agent: curated-arch-upstream-check'
+)
+github_args=(
+  "${curl_args[@]}"
+  --header 'Accept: application/vnd.github+json'
+)
+if [[ -n ${GITHUB_TOKEN:-} ]]; then
+  github_args+=(--header "Authorization: Bearer $GITHUB_TOKEN")
+fi
+
+pkgver() {
+  awk -F= '$1 == "pkgver" { print $2; exit }' \
+    "$repo_root/packages/$1/PKGBUILD"
+}
+
+variable() {
+  awk -F= -v name="$2" '$1 == name { print $2; exit }' \
+    "$repo_root/packages/$1/PKGBUILD"
+}
+
+github_release() {
+  curl "${github_args[@]}" \
+    "https://api.github.com/repos/$1/releases/latest" \
+    | jq -er '.tag_name | strings | select(length > 0)'
+}
+
+github_head() {
+  curl "${github_args[@]}" \
+    "https://api.github.com/repos/$1/commits/HEAD" \
+    | jq -er '.sha | strings | select(length == 40)'
+}
+
+wago_release() {
+  curl "${curl_args[@]}" \
+    'https://cdn.wago.io/wagoapp/latest-linux.yml' \
+    | awk -F ': *' '$1 == "version" { sub(/\r$/, "", $2); print $2; exit }'
+}
+
+kde_tag() {
+  curl "${curl_args[@]}" \
+    'https://invent.kde.org/api/v4/projects/system%2Fxwaylandvideobridge/repository/tags?per_page=20&order_by=version&sort=desc' \
+    | jq -er '[.[].name | select(test("^v?[0-9]+(\\.[0-9]+)+$"))][0]'
+}
+
+updates=0
+errors=0
+printf '| Package | Pinned | Upstream | Result |\n' > "$summary"
+printf '| --- | --- | --- | --- |\n' >> "$summary"
+
+check() {
+  local package=$1 expected=$2 source=$3 current
+  shift 3
+
+  if ! current=$("$@") || [[ -z $current ]]; then
+    printf '%-36s check failed (%s)\n' "$package" "$source"
+    printf "| \`%s\` | \`%s\` | — | check failed |\n" \
+      "$package" "$expected" >> "$summary"
+    if [[ ${GITHUB_ACTIONS:-} == true ]]; then
+      printf '::error title=Upstream check failed: %s::%s\n' "$package" "$source"
+    fi
+    errors=$((errors + 1))
+    return
+  fi
+
+  if [[ $current == "$expected" ]]; then
+    printf '%-36s current (%s)\n' "$package" "$current"
+    printf "| \`%s\` | \`%s\` | \`%s\` | current |\n" \
+      "$package" "$expected" "$current" >> "$summary"
+  else
+    printf '%-36s movement: %s -> %s\n' "$package" "$expected" "$current"
+    printf "| \`%s\` | \`%s\` | \`%s\` | **movement** |\n" \
+      "$package" "$expected" "$current" >> "$summary"
+    if [[ ${GITHUB_ACTIONS:-} == true ]]; then
+      printf '::warning title=Upstream movement: %s::%s -> %s (%s)\n' \
+        "$package" "$expected" "$current" "$source"
+    fi
+    updates=$((updates + 1))
+  fi
+}
+
+check archon-appimage "v$(pkgver archon-appimage)" \
+  'GitHub release' github_release RPGLogs/Uploaders-archon
+check ferdium "v$(pkgver ferdium)" \
+  'GitHub release' github_release ferdium/ferdium-app
+check headset-charge-indicator-git \
+  "$(variable headset-charge-indicator-git _commit)" \
+  'GitHub default branch' github_head centic9/headset-charge-indicator
+check mediatek-mt7927-dkms "$(variable mediatek-mt7927-dkms _upstream_tag)" \
+  'GitHub release' github_release jetm/mediatek-mt7927-dkms
+check pw-duck "v$(pkgver pw-duck)" \
+  'GitHub release' github_release geri1701/pw-duck
+check wago-app-bin "$(pkgver wago-app-bin)" \
+  'Wago update metadata' wago_release
+check wowup-cf-bin "v$(pkgver wowup-cf-bin)" \
+  'GitHub release' github_release WowUp/WowUp.CF
+check xwaylandvideobridge "v$(pkgver xwaylandvideobridge)" \
+  'KDE GitLab tag' kde_tag
+
+if [[ -n ${GITHUB_STEP_SUMMARY:-} ]]; then
+  {
+    printf '## Upstream movement\n\n'
+    cat "$summary"
+    printf '\nThe checker only reports; it does not modify package recipes.\n'
+  } >> "$GITHUB_STEP_SUMMARY"
+fi
+
+if (( errors > 0 )); then
+  printf '\n%d upstream check(s) failed. No files were changed.\n' "$errors" >&2
+  exit 2
+fi
+if (( updates > 0 )); then
+  printf '\n%d upstream movement(s) detected. Review manually; no files were changed.\n' \
+    "$updates" >&2
+  exit 1
+fi
+
+printf '\nAll tracked upstream pins are current. No files were changed.\n'

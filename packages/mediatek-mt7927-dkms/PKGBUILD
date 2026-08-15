@@ -1,0 +1,71 @@
+# Maintainer: Gerhard Schwanzer <geri@sdf.org>
+# SPDX-License-Identifier: MIT
+
+pkgname=mediatek-mt7927-dkms
+pkgver=2.13
+pkgrel=3
+pkgdesc='DKMS Bluetooth and Wi-Fi modules for MediaTek MT7927 Filogic 380'
+arch=('x86_64')
+url='https://github.com/jetm/mediatek-mt7927-dkms'
+license=('GPL-2.0-only AND LicenseRef-MediaTek-Firmware')
+depends=('dkms')
+makedepends=('curl' 'python')
+provides=('mediatek-mt6639-bt-dkms' 'mediatek-mt7925-wifi-dkms')
+conflicts=('btusb-mt7925-dkms' 'btusb-mt7927-dkms')
+install=mediatek-mt7927-dkms.install
+
+_upstream_tag=v2.13-1
+_upstream_commit=ad1f3e4d19fe540aaa1f449ddba86c65db9bfc82
+_source_dir="$pkgname-$_upstream_commit"
+_kernel_version=7.1.3
+_driver_filename=DRV_WiFi_MTK_MT7925_MT7927_TP_W11_64_V5603998_20250709R.zip
+_driver_sha256=b377fffa28208bb1671a0eb219c84c62fba4cd6f92161b74e4b0909476307cc8
+
+source=(
+  "$pkgname-$_upstream_commit.tar.gz::$url/archive/$_upstream_commit.tar.gz"
+  "linux-$_kernel_version.tar.xz::https://cdn.kernel.org/pub/linux/kernel/v${_kernel_version%%.*}.x/linux-$_kernel_version.tar.xz"
+  'FIRMWARE-NOTICE'
+)
+sha256sums=(
+  'e3e5a1c2306e9b8859f539ae035e0046455e01e4b516455ad84b50b3eda1c21c'
+  'be41c068e88f5242a19bccdbffbe077b18c47b45f627e2325504b4fab79dd1dc'
+  'b4f316f5aa539734f6d4970708c1426264eb9476e5ec8b76fe247d259c677227'
+)
+
+prepare() {
+  local cache_dir=${SRCDEST:-$srcdir}
+  local driver_zip="$cache_dir/$_driver_filename"
+
+  if [[ ! -f $driver_zip ]]; then
+    DRIVER_FILENAME=$_driver_filename \
+      "$srcdir/$_source_dir/download-driver.sh" "$cache_dir"
+  fi
+
+  echo "$_driver_sha256  $driver_zip" | sha256sum -c -
+}
+
+build() {
+  local cache_dir=${SRCDEST:-$srcdir}
+
+  make -C "$srcdir/$_source_dir" sources \
+    MT76_KVER=$_kernel_version \
+    KERNEL_TARBALL="$srcdir/linux-$_kernel_version.tar.xz" \
+    DRIVER_ZIP="$cache_dir/$_driver_filename" \
+    SRCDIR="$srcdir/_build"
+}
+
+package() {
+  local cache_dir=${SRCDEST:-$srcdir}
+
+  make -C "$srcdir/$_source_dir" install \
+    MT76_KVER=$_kernel_version \
+    KERNEL_TARBALL="$srcdir/linux-$_kernel_version.tar.xz" \
+    DRIVER_ZIP="$cache_dir/$_driver_filename" \
+    SRCDIR="$srcdir/_build" \
+    DESTDIR="$pkgdir" \
+    VERSION=$pkgver
+
+  rm "$pkgdir/usr/src/mediatek-mt7927-$pkgver/extract_firmware.py"
+  install -Dm644 "$srcdir/FIRMWARE-NOTICE" \
+    "$pkgdir/usr/share/licenses/$pkgname/FIRMWARE-NOTICE"
+}

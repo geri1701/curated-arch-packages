@@ -1,0 +1,18 @@
+pkgbase = headset-charge-indicator-git
+	pkgdesc = Tray indicator for the battery charge of supported wireless headsets
+	pkgver = 1.0.0.0.r73.gfa11630
+	pkgrel = 1
+	url = https://github.com/centic9/headset-charge-indicator
+	arch = any
+	license = BSD-2-Clause
+	depends = adwaita-icon-theme
+	depends = headsetcontrol
+	depends = libayatana-appindicator
+	depends = python
+	depends = python-gobject
+	provides = headset-charge-indicator
+	conflicts = headset-charge-indicator
+	source = headset-charge-indicator-git-fa11630971fd78808e0624930fa5716af06d15fb.tar.gz::https://github.com/centic9/headset-charge-indicator/archive/fa11630971fd78808e0624930fa5716af06d15fb.tar.gz
+	sha256sums = 37446531f024c3d2cd5e9c2481ceda2371b9711830dfbde99a2534515d7937d4
+
+pkgname = headset-charge-indicator-git

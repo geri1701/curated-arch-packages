@@ -1,0 +1,6 @@
+Wago App is proprietary software distributed by The Wago Dev Team
+<support@wago.io>. All rights are reserved by the upstream vendor.
+
+This package recipe downloads the unmodified upstream AppImage for local
+installation. Bundled Electron and Chromium notices are installed alongside
+this notice.

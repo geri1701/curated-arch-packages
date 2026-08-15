@@ -1,0 +1,30 @@
+# Maintainer: Gerhard Schwanzer <geri@sdf.org>
+
+pkgname=headset-charge-indicator-git
+_pkgname=headset-charge-indicator
+_commit=fa11630971fd78808e0624930fa5716af06d15fb
+pkgver=1.0.0.0.r73.gfa11630
+pkgrel=1
+pkgdesc='Tray indicator for the battery charge of supported wireless headsets'
+arch=('any')
+url='https://github.com/centic9/headset-charge-indicator'
+license=('BSD-2-Clause')
+depends=(
+  'adwaita-icon-theme'
+  'headsetcontrol'
+  'libayatana-appindicator'
+  'python'
+  'python-gobject'
+)
+provides=("$_pkgname")
+conflicts=("$_pkgname")
+source=("$pkgname-$_commit.tar.gz::$url/archive/$_commit.tar.gz")
+sha256sums=('37446531f024c3d2cd5e9c2481ceda2371b9711830dfbde99a2534515d7937d4')
+
+package() {
+  cd "$_pkgname-$_commit"
+
+  install -Dm755 "$_pkgname.py" "$pkgdir/usr/bin/$_pkgname"
+  install -Dm644 README.md "$pkgdir/usr/share/doc/$_pkgname/README.md"
+  install -Dm644 LICENSE.md "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

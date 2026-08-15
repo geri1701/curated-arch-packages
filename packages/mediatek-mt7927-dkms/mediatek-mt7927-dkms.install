@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: MIT
+
+pre_remove() {
+  local version=${1%-*}
+  dkms remove "mediatek-mt7927/$version" --all || true
+}

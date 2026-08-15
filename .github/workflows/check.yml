@@ -1,0 +1,169 @@
+name: Check packages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - packages/**
+      - config/paru.conf
+      - .github/workflows/check.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ARCH_IMAGE: archlinux@sha256:b0deabeb3d283da2c7f7dbf0eea051b7b2cd0554e0b737cc457fd21683bdcdd1
+  PARU_COMMIT: 9ac3578807a87858651e81a02586ceb947686e7c
+  PARU_SHA256: fa1e2da402283f9584f98458c61ae8d0bb04c92b2cddb1d2727c8ce944da457e
+
+jobs:
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        package:
+          - archon-appimage
+          - curated-aur-search
+          - ferdium
+          - headset-charge-indicator-git
+          - mediatek-mt7927-dkms
+          - pw-duck
+          - wago-app-bin
+          - wowup-cf-bin
+          - xwaylandvideobridge
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Validate, build, and install package
+        env:
+          PACKAGE: ${{ matrix.package }}
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            --volume "$PWD:/work:ro" \
+            --tmpfs /build:exec,size=12G \
+            --env PACKAGE \
+            "$ARCH_IMAGE" \
+            bash -euo pipefail -c '
+              pacman -Syu --noconfirm --needed base-devel namcap sudo
+              useradd --create-home builder
+              printf "builder ALL=(ALL:ALL) NOPASSWD: /usr/bin/pacman\n" \
+                > /etc/sudoers.d/builder
+              chmod 0440 /etc/sudoers.d/builder
+
+              cp -a "/work/packages/$PACKAGE" /build/package
+              mkdir /build/output
+              chown -R builder:builder /build/package /build/output
+              cd /build/package
+
+              su builder -c "makepkg --printsrcinfo" > .SRCINFO.generated
+              diff -u .SRCINFO .SRCINFO.generated
+
+              su builder -c \
+                "PKGDEST=/build/output makepkg --syncdeps --cleanbuild --clean --noconfirm"
+
+              namcap PKGBUILD
+              namcap /build/output/*.pkg.tar.*
+
+              if [[ "$PACKAGE" == mediatek-mt7927-dkms ]]; then
+                pacman -S --noconfirm --needed linux linux-headers
+              fi
+
+              pacman -U --noconfirm /build/output/*.pkg.tar.*
+              pacman -Q "$PACKAGE"
+
+              if [[ "$PACKAGE" == mediatek-mt7927-dkms ]]; then
+                kernel=$(find /usr/lib/modules \
+                  -mindepth 1 -maxdepth 1 -type d -name "*-arch*-*" \
+                  -printf "%f\n" | sort -V | tail -n 1)
+                test -n "$kernel"
+
+                dkms status mediatek-mt7927/2.13 -k "$kernel" \
+                  | tee /tmp/dkms-status
+                grep -Eq ": installed( |$)" /tmp/dkms-status
+
+                find "/usr/lib/modules/$kernel/updates/dkms" \
+                  -type f -name "*.ko*" -print | sort \
+                  | tee /tmp/dkms-modules
+                test "$(wc -l < /tmp/dkms-modules)" -ge 9
+
+                pacman -R --noconfirm mediatek-mt7927-dkms
+                ! dkms status mediatek-mt7927/2.13 2>/dev/null \
+                  | grep -q .
+              fi
+            '
+
+  repository:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Verify Paru package discovery without AUR
+        run: |
+          set -euo pipefail
+          docker run --rm \
+            --volume "$PWD:/work:ro" \
+            --tmpfs /build:exec,size=4G \
+            --env PARU_COMMIT \
+            --env PARU_SHA256 \
+            "$ARCH_IMAGE" \
+            bash -euo pipefail -c '
+              pacman -Syu --noconfirm --needed \
+                base-devel cargo curl git sudo
+
+              mkdir /tmp/paru-src
+              curl --fail --location --retry 3 \
+                --output /tmp/paru.tar.gz \
+                "https://github.com/Morganamilo/paru/archive/$PARU_COMMIT.tar.gz"
+              printf "%s  %s\n" "$PARU_SHA256" /tmp/paru.tar.gz \
+                | sha256sum --check
+              tar --extract --gzip --strip-components=1 \
+                --file /tmp/paru.tar.gz --directory /tmp/paru-src
+              cargo build --release --locked --quiet \
+                --manifest-path /tmp/paru-src/Cargo.toml
+              install -Dm755 /tmp/paru-src/target/release/paru \
+                /usr/local/bin/paru
+              install -Dm644 /tmp/paru-src/paru.conf /etc/paru.conf
+
+              useradd --create-home builder
+              cp -a /work /build/repository
+              chown -R builder:builder /build/repository
+
+              sed "s#^Url = .*#Path = /build/repository#" \
+                /work/config/paru.conf > /build/paru.conf
+              chown builder:builder /build/paru.conf
+
+              for srcinfo in /work/packages/*/.SRCINFO; do
+                awk -v repo=curated-arch '\''
+                  $1 == "epoch"  { epoch = $3 ":" }
+                  $1 == "pkgver" { pkgver = $3 }
+                  $1 == "pkgrel" { pkgrel = $3 }
+                  $1 == "pkgname" { names[++count] = $3 }
+                  END {
+                    for (i = 1; i <= count; i++)
+                      print repo, names[i], epoch pkgver "-" pkgrel
+                  }
+                '\'' "$srcinfo"
+              done | sort > /build/expected
+
+              su builder -c \
+                "PARU_CONF=/build/paru.conf paru -Sl --pkgbuilds" \
+                | sort > /build/discovered
+              diff -u /build/expected /build/discovered
+
+              if su builder -c \
+                "PARU_CONF=/build/paru.conf paru --aur -Ss google-chrome"; then
+                echo "AUR search unexpectedly succeeded through Paru" >&2
+                exit 1
+              fi
+            '

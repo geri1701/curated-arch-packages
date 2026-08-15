@@ -1,0 +1,5 @@
+Archon is proprietary software distributed by its upstream vendor.
+
+This package recipe downloads the unmodified upstream AppImage for local
+installation. No redistribution license is granted by this package recipe.
+Bundled Electron and Chromium notices are installed alongside this notice.

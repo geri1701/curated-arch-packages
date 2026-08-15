@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if (( $# == 0 )); then
+  printf 'Usage: aur-search SEARCH TERM\n' >&2
+  exit 2
+fi
+
+query=$*
+response=$(curl \
+  --fail \
+  --silent \
+  --show-error \
+  --location \
+  --connect-timeout 10 \
+  --max-time 30 \
+  --retry 2 \
+  --get \
+  --data-urlencode 'v=5' \
+  --data-urlencode 'type=search' \
+  --data-urlencode 'by=name-desc' \
+  --data-urlencode "arg=$query" \
+  'https://aur.archlinux.org/rpc/')
+
+if [[ $(jq -r '.type // ""' <<<"$response") == error ]]; then
+  jq -r '.error' <<<"$response" >&2
+  exit 1
+fi
+
+jq -e '.type == "search" and (.results | type == "array")' \
+  >/dev/null <<<"$response"
+
+if (( $(jq -r '.resultcount' <<<"$response") == 0 )); then
+  printf 'No AUR results for: %s\n' "$query"
+  exit 0
+fi
+
+printf 'AUR search only; installation is disabled.\n\n'
+jq -r '
+  .results[]
+  | "aur/\(.Name) \(.Version)\(if .OutOfDate then " [out of date]" else "" end)\n"
+    + "    \(.Description // "No description")\n"
+    + "    https://aur.archlinux.org/packages/\(.Name)"
+' <<<"$response"

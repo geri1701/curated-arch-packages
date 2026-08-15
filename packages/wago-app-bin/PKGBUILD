@@ -1,0 +1,86 @@
+# Maintainer: Gerhard Schwanzer <geri@sdf.org>
+
+pkgname=wago-app-bin
+_pkgname=WagoApp
+pkgver=2.14.1
+pkgrel=1
+pkgdesc='Wago addon and WeakAura manager packaged from the upstream AppImage'
+arch=('x86_64')
+url='https://addons.wago.io/'
+license=('LicenseRef-proprietary')
+depends=(
+  'alsa-lib'
+  'at-spi2-core'
+  'cairo'
+  'dbus'
+  'expat'
+  'gcc-libs'
+  'glib2'
+  'glibc'
+  'gtk3'
+  'hicolor-icon-theme'
+  'libcups'
+  'libnotify'
+  'libsecret'
+  'libx11'
+  'libxcb'
+  'libxcomposite'
+  'libxdamage'
+  'libxext'
+  'libxfixes'
+  'libxkbcommon'
+  'libxrandr'
+  'mesa'
+  'nspr'
+  'nss'
+  'pango'
+  'systemd-libs'
+  'util-linux-libs'
+  'xdg-utils'
+)
+optdepends=('libayatana-appindicator: tray icon support')
+provides=('wago-app')
+conflicts=('wago-app')
+options=('!strip' '!debug')
+source=(
+  "$_pkgname-$pkgver.AppImage::https://cdn.wago.io/wagoapp/${_pkgname}_$pkgver.AppImage"
+  'LICENSE'
+)
+noextract=("$_pkgname-$pkgver.AppImage")
+sha256sums=(
+  '4145d4c05ad5dd8b2fdd064927c414bcff1145a891eb6cf0dd2d2c5d11ad186e'
+  '31a4e7c58f5c5b8c0e9c17aa3fd531894a84102b927919961dd2b05e77835cca'
+)
+
+prepare() {
+  cd "$srcdir"
+  chmod +x "$_pkgname-$pkgver.AppImage"
+  ./"$_pkgname-$pkgver.AppImage" --appimage-extract >/dev/null
+}
+
+package() {
+  cd "$srcdir"
+
+  install -dm755 "$pkgdir/opt/$pkgname"
+  cp -a squashfs-root/. "$pkgdir/opt/$pkgname/"
+  rm -rf "$pkgdir/opt/$pkgname"/{AppRun,.DirIcon,"$_pkgname.desktop","$_pkgname.png",usr}
+  chmod -R u+rwX,go+rX,go-w "$pkgdir/opt/$pkgname"
+
+  install -dm755 "$pkgdir/usr/bin"
+  ln -s "/opt/$pkgname/$_pkgname" "$pkgdir/usr/bin/wago-app"
+  ln -s "/opt/$pkgname/$_pkgname" "$pkgdir/usr/bin/$_pkgname"
+
+  install -Dm644 "squashfs-root/$_pkgname.desktop" \
+    "$pkgdir/usr/share/applications/$_pkgname.desktop"
+  sed -i 's|^Exec=.*|Exec=/usr/bin/wago-app %U|' \
+    "$pkgdir/usr/share/applications/$_pkgname.desktop"
+  install -Dm644 \
+    "squashfs-root/usr/share/icons/hicolor/2791x2791/apps/$_pkgname.png" \
+    "$pkgdir/usr/share/icons/hicolor/2791x2791/apps/$_pkgname.png"
+
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  ln -s "/opt/$pkgname/LICENSE.electron.txt" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSE.electron.txt"
+  ln -s "/opt/$pkgname/LICENSES.chromium.html" \
+    "$pkgdir/usr/share/licenses/$pkgname/LICENSES.chromium.html"
+}
