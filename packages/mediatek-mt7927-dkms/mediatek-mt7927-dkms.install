@@ -1,5 +1,36 @@
 # SPDX-License-Identifier: MIT
 
+_warn_bt_opt_in() {
+  local device vendor product
+
+  for device in /sys/bus/usb/devices/*; do
+    [[ -r $device/idVendor && -r $device/idProduct ]] || continue
+    read -r vendor < "$device/idVendor" || continue
+    read -r product < "$device/idProduct" || continue
+    [[ $vendor == 0489 && $product == e156 ]] || continue
+
+    if ! grep -qiE '^[[:space:]]*BUILD_BT=(y|yes|1|true)' \
+        /etc/mediatek-mt7927-dkms.conf 2>/dev/null; then
+      cat <<'EOF'
+==> NOTE: Bluetooth device 0489:e156 needs the optional DKMS modules.
+    Enable them and rebuild before rebooting:
+
+      echo 'BUILD_BT=yes' | sudo tee /etc/mediatek-mt7927-dkms.conf
+      sudo dkms autoinstall
+EOF
+    fi
+    return
+  done
+}
+
+post_install() {
+  _warn_bt_opt_in
+}
+
+post_upgrade() {
+  _warn_bt_opt_in
+}
+
 pre_remove() {
   local version=${1%-*}
   dkms remove "mediatek-mt7927/$version" --all || true

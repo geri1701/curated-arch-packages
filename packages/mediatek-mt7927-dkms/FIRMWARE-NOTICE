@@ -4,12 +4,14 @@ This package extracts and installs the following binary firmware from an
 official ASUS driver archive:
 
 - BT_RAM_CODE_MT6639_2_1_hdr.bin
-- WIFI_MT6639_PATCH_MCU_2_1_hdr.bin
-- WIFI_RAM_CODE_MT6639_2_1.bin
 
-These files are not included in this source repository and are not covered by
-GPL-2.0-only. They are proprietary firmware. Copyright and other rights remain
-with MediaTek Inc., ASUSTeK Computer Inc., and/or their licensors.
+The same build input also contains Wi-Fi firmware. This package deliberately
+does not install those files because linux-firmware-mediatek provides newer
+MediaTek-submitted versions.
+
+The installed firmware is not included in this source repository and is not
+covered by GPL-2.0-only. Copyright and other rights remain with MediaTek Inc.,
+ASUSTeK Computer Inc., and/or their licensors.
 
 This notice grants no permission to redistribute the firmware. The package
 performs a local installation from the vendor download. Use of that download

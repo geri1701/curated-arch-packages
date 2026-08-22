@@ -84,17 +84,27 @@ jobs:
                   -printf "%f\n" | sort -V | tail -n 1)
                 test -n "$kernel"
 
-                dkms status mediatek-mt7927/2.13 -k "$kernel" \
+                dkms status mediatek-mt7927/2.14 -k "$kernel" \
                   | tee /tmp/dkms-status
                 grep -Eq ": installed( |$)" /tmp/dkms-status
 
                 find "/usr/lib/modules/$kernel/updates/dkms" \
                   -type f -name "*.ko*" -print | sort \
                   | tee /tmp/dkms-modules
-                test "$(wc -l < /tmp/dkms-modules)" -ge 9
+                test "$(wc -l < /tmp/dkms-modules)" -eq 5
+                ! grep -Eq "/(btusb|btmtk|mt7921-common|mt7921e)\.ko" \
+                  /tmp/dkms-modules
+
+                test -e \
+                  /usr/lib/firmware/mediatek/mt7927/WIFI_RAM_CODE_MT6639_2_1.bin.zst
+                test ! -e \
+                  /usr/lib/firmware/mediatek/mt7927/WIFI_RAM_CODE_MT6639_2_1.bin
+                pacman -Qo \
+                  /usr/lib/firmware/mediatek/mt7927/BT_RAM_CODE_MT6639_2_1_hdr.bin \
+                  | grep -Fq mediatek-mt7927-dkms
 
                 pacman -R --noconfirm mediatek-mt7927-dkms
-                ! dkms status mediatek-mt7927/2.13 2>/dev/null \
+                ! dkms status mediatek-mt7927/2.14 2>/dev/null \
                   | grep -q .
               fi
             '
