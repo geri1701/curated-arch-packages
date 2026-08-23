@@ -1,8 +1,8 @@
 # Maintainer: Gerhard Schwanzer <geri@sdf.org>
 
 pkgname=xwaylandvideobridge
-pkgver=0.5.1
-pkgrel=2
+pkgver=0.5.2
+pkgrel=1
 pkgdesc='Utility to allow streaming Wayland windows to X applications'
 arch=('x86_64')
 url='https://invent.kde.org/system/xwaylandvideobridge'
@@ -13,6 +13,7 @@ depends=(
   'hicolor-icon-theme'
   'kcoreaddons'
   'kcrash'
+  'kdbusaddons'
   'ki18n'
   'kpipewire'
   'kstatusnotifieritem'
@@ -26,7 +27,7 @@ options=('!debug')
 source=(
   "$pkgname-$pkgver.tar.gz::$url/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz"
 )
-sha256sums=('aa27f9679ab22fecaa790b10c9845b15a9deb60b9826fa34b1d6033f05b2fa1f')
+sha256sums=('7c2be7e3fe92c28a99cd3c16619c68098ab930f7683c1855a9ffc4535a8280c7')
 
 build() {
   cmake -B build -S "$pkgname-v$pkgver" \
