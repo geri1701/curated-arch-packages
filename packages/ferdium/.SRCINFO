@@ -1,7 +1,7 @@
 pkgbase = ferdium
 	pkgdesc = Messaging app combining multiple services in one application
-	pkgver = 7.1.2
-	pkgrel = 2
+	pkgver = 7.2.1
+	pkgrel = 1
 	url = https://ferdium.org/
 	arch = x86_64
 	license = Apache-2.0
@@ -42,12 +42,12 @@ pkgbase = ferdium
 	conflicts = ferdium-beta
 	conflicts = ferdium-git
 	conflicts = ferdium-electron
-	noextract = ferdium-7.1.2.deb
+	noextract = ferdium-7.2.1.deb
 	options = !strip
 	options = !debug
-	source = ferdium-7.1.2.deb::https://github.com/ferdium/ferdium-app/releases/download/v7.1.2/Ferdium-linux-7.1.2-amd64.deb
-	source = LICENSE-7.1.2.md::https://raw.githubusercontent.com/ferdium/ferdium-app/v7.1.2/LICENSE.md
-	sha256sums = 38340a16305adab889636e9a3da01f2f3b82c8b624079a184b1204dbc9cc9b06
+	source = ferdium-7.2.1.deb::https://github.com/ferdium/ferdium-app/releases/download/v7.2.1/Ferdium-linux-7.2.1-amd64.deb
+	source = LICENSE-7.2.1.md::https://raw.githubusercontent.com/ferdium/ferdium-app/v7.2.1/LICENSE.md
+	sha256sums = a3518a164235199b0edf3e1e7f5d0d3d3d9118ce1ff175191368f438fe21e08a
 	sha256sums = d8cce85684984a168ed6d7a4513b7a27b3471a8f0d1efabc1f58faf556c73ac0
 
 pkgname = ferdium

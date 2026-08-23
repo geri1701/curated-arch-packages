@@ -1,8 +1,8 @@
 # Maintainer: Gerhard Schwanzer <geri@sdf.org>
 
 pkgname=ferdium
-pkgver=7.1.2
-pkgrel=2
+pkgver=7.2.1
+pkgrel=1
 pkgdesc='Messaging app combining multiple services in one application'
 arch=('x86_64')
 url='https://ferdium.org/'
@@ -55,7 +55,7 @@ source=(
 )
 noextract=("$pkgname-$pkgver.deb")
 sha256sums=(
-  '38340a16305adab889636e9a3da01f2f3b82c8b624079a184b1204dbc9cc9b06'
+  'a3518a164235199b0edf3e1e7f5d0d3d3d9118ce1ff175191368f438fe21e08a'
   'd8cce85684984a168ed6d7a4513b7a27b3471a8f0d1efabc1f58faf556c73ac0'
 )
 
