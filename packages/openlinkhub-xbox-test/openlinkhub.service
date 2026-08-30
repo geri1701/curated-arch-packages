@@ -1,0 +1,13 @@
+[Unit]
+Description=Open source interface for supported Corsair devices
+
+[Service]
+User=openlinkhub
+Group=openlinkhub
+WorkingDirectory=/var/lib/openlinkhub
+ExecStart=/usr/bin/openlinkhub
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

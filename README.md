@@ -13,12 +13,15 @@ source and does not distribute binaries.
 | [`ferdium`](packages/ferdium/) | Multi-service messaging app |
 | [`headset-charge-indicator-git`](packages/headset-charge-indicator-git/) | Battery indicator for supported wireless headsets |
 | [`mediatek-mt7927-dkms`](packages/mediatek-mt7927-dkms/) | DKMS Wi-Fi and Bluetooth drivers for MediaTek MT7927 hardware |
+| [`openlinkhub-xbox-test`](packages/openlinkhub-xbox-test/) | Explicit experimental test build for Corsair VOID MAX WIRELESS XBOX devices |
 | [`pw-duck`](packages/pw-duck/) | PipeWire audio ducking tray app |
 | [`wago-app-bin`](packages/wago-app-bin/) | Wago addon and WeakAura manager |
 | [`wowup-cf-bin`](packages/wowup-cf-bin/) | World of Warcraft addon updater with CurseForge support |
 | [`xwaylandvideobridge`](packages/xwaylandvideobridge/) | Wayland window sharing for X applications |
 
 Recipes live under `packages/<pkgbase>/` with matching `.SRCINFO` metadata.
+Packages ending in `-test` are experimental and require explicit installation;
+follow their package-specific preparation and rollback instructions.
 
 ## Paru setup
 

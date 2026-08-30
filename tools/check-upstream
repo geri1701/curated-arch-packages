@@ -52,6 +52,12 @@ github_head() {
     | jq -er '.sha | strings | select(length == 40)'
 }
 
+github_ref() {
+  curl "${github_args[@]}" \
+    "https://api.github.com/repos/$1/commits/$2" \
+    | jq -er '.sha | strings | select(length == 40)'
+}
+
 wago_release() {
   curl "${curl_args[@]}" \
     'https://cdn.wago.io/wagoapp/latest-linux.yml' \
@@ -109,6 +115,9 @@ check headset-charge-indicator-git \
   'GitHub default branch' github_head centic9/headset-charge-indicator
 check mediatek-mt7927-dkms "$(variable mediatek-mt7927-dkms _upstream_tag)" \
   'GitHub release' github_release jetm/mediatek-mt7927-dkms
+check openlinkhub-xbox-test "$(variable openlinkhub-xbox-test _commit)" \
+  'GitHub test branch' github_ref geri1701/OpenLinkHub \
+  test-void-max-wireless-xbox
 check pw-duck "v$(pkgver pw-duck)" \
   'GitHub release' github_release geri1701/pw-duck
 check wago-app-bin "$(pkgver wago-app-bin)" \

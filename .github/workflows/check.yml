@@ -30,6 +30,7 @@ jobs:
           - ferdium
           - headset-charge-indicator-git
           - mediatek-mt7927-dkms
+          - openlinkhub-xbox-test
           - pw-duck
           - wago-app-bin
           - wowup-cf-bin
@@ -77,6 +78,35 @@ jobs:
 
               pacman -U --noconfirm /build/output/*.pkg.tar.*
               pacman -Q "$PACKAGE"
+
+              if [[ "$PACKAGE" == openlinkhub-xbox-test ]]; then
+                getent passwd openlinkhub
+                test "$(stat -c "%U:%G" /var/lib/openlinkhub)" \
+                  = "openlinkhub:openlinkhub"
+                grep -Fq "ATTRS{idProduct}==\"2a05\"" \
+                  /etc/udev/rules.d/99-openlinkhub.rules
+                systemd-analyze verify \
+                  /usr/lib/systemd/system/openlinkhub.service
+                readelf -hW /usr/bin/openlinkhub \
+                  | grep -Eq "Type:.*DYN"
+                readelf -lW /usr/bin/openlinkhub \
+                  | grep -Fq GNU_RELRO
+                readelf -dW /usr/bin/openlinkhub \
+                  | grep -Eq "BIND_NOW|FLAGS.*NOW"
+                go version -m /usr/bin/openlinkhub \
+                  | grep -Fq -- "-buildmode=pie"
+                if grep -aF /build/package /usr/bin/openlinkhub; then
+                  echo "OpenLinkHub contains a build path" >&2
+                  exit 1
+                fi
+                pacman -Qi "$PACKAGE" \
+                  | grep -Eq \
+                    "^Provides[[:space:]]*: openlinkhub="
+                pacman -Qi "$PACKAGE" \
+                  | grep -Eq "^Conflicts With[[:space:]]*: openlinkhub"
+                pacman -R --noconfirm "$PACKAGE"
+                ! pacman -Q "$PACKAGE" 2>/dev/null
+              fi
 
               if [[ "$PACKAGE" == mediatek-mt7927-dkms ]]; then
                 kernel=$(find /usr/lib/modules \

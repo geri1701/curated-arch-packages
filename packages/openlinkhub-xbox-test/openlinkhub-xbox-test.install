@@ -1,0 +1,12 @@
+# shellcheck shell=bash
+
+post_upgrade() {
+	if systemctl is-active --quiet openlinkhub.service; then
+		systemctl restart openlinkhub.service ||
+			printf 'OpenLinkHub could not be restarted after the upgrade.\n' >&2
+	fi
+}
+
+pre_remove() {
+	systemctl disable --now openlinkhub.service >/dev/null 2>&1 || true
+}
