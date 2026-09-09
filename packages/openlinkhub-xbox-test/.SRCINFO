@@ -1,6 +1,6 @@
 pkgbase = openlinkhub-xbox-test
-	pkgdesc = Experimental test mapping for Corsair VOID MAX WIRELESS XBOX devices
-	pkgver = 0.9.1.r6.gbf03abb2
+	pkgdesc = Experimental Corsair VOID MAX WIRELESS V2 support via Xbox receiver
+	pkgver = 0.9.1.r7.gd8bd2303
 	pkgrel = 1
 	url = https://github.com/geri1701/OpenLinkHub/tree/test-void-max-wireless-xbox
 	install = openlinkhub-xbox-test.install
@@ -10,21 +10,21 @@ pkgbase = openlinkhub-xbox-test
 	depends = i2c-tools
 	depends = libpipewire
 	depends = systemd
-	provides = openlinkhub=0.9.1.r6.gbf03abb2
+	provides = openlinkhub=0.9.1.r7.gd8bd2303
 	conflicts = openlinkhub
 	options = !debug
 	backup = etc/udev/rules.d/99-openlinkhub.rules
-	source = openlinkhub-bf03abb23eecab67e6662e6868706a87cae873af.tar.gz::https://github.com/geri1701/OpenLinkHub/archive/bf03abb23eecab67e6662e6868706a87cae873af.tar.gz
+	source = openlinkhub-d8bd2303689dd0272cfd4be2a0f11089a194fe86.tar.gz::https://github.com/geri1701/OpenLinkHub/archive/d8bd2303689dd0272cfd4be2a0f11089a194fe86.tar.gz
 	source = openlinkhub-xbox-test.install
 	source = openlinkhub.service
 	source = openlinkhub.sysusers
 	source = openlinkhub.tmpfiles
 	source = README.md
-	sha256sums = 7a7f363a4ded16a5f5bea9f724b4948bedf0e11a6f266c700e631f73a924e977
+	sha256sums = de092b87b606a3e6130ee234d6fefbd31f4ae79ac68dfdee3cd6f525371cd38e
 	sha256sums = c2e042a978b5cb4f12bd68724299259efdf8e9b44af4cf907302dce9795101c6
 	sha256sums = b8ce151d883861cb98b68f0f08191027f462a674317fe8ed9891f9ba2d27da81
 	sha256sums = 325fa3c6ab4222ee77dcfa57f89360172f784ebc7f1b731c7d43d2591daaeb47
 	sha256sums = 7648a2022cad796563dfd267547664705687be03e3079c19c89bb529f7369f59
-	sha256sums = 566a0557a83844cd5d597ec42eef58ddd48d024c5cc9c3539edd95e66dc52b5a
+	sha256sums = c6228d4651eb96322ec935b3ab0a2bad5c2d5e6d6c37e6c85e9afe5961b3b3ea
 
 pkgname = openlinkhub-xbox-test

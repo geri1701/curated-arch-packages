@@ -1,80 +1,93 @@
-# OpenLinkHub Xbox headset test package
+# OpenLinkHub VOID MAX Wireless V2 test package
 
-`openlinkhub-xbox-test` is an explicit opt-in build for hardware testing of the
-Corsair VOID MAX WIRELESS for Xbox receiver (`1b1c:2a05`) and paired headset
-(`1b1c:2a07`). The source is pinned to a signed commit in the public
-experimental fork. Protocol compatibility has not yet been proven on real
-hardware.
+`openlinkhub-xbox-test` is an explicit opt-in build with experimental support for
+the Corsair VOID MAX WIRELESS V2 through its "for Xbox" receiver
+(`1b1c:2a05`) and paired headset (`1b1c:2a07`). The source is pinned to a
+signed commit in the public experimental fork.
 
-The package provides and conflicts with `openlinkhub`, but does not replace it
-automatically. Do not remove the installed CachyOS package separately: Pacman
-must remove it as part of the same transaction that installs this package.
+Device recognition, audio playback, microphone recording, microphone muting,
+and LED control were verified on the target hardware on 2026-08-30. The package
+remains experimental because not every device mode and protocol control has
+been covered.
 
-## Prepare
+## Known limitation
 
-Before testing:
+OpenLinkHub puts the headset into software mode while controlling it. Raising
+the microphone still mutes it, but the headset's onboard audible mute/unmute
+signal is unavailable in that mode. The same mode-dependent behavior was
+[reproduced upstream with iCUE on another Corsair wireless headset][issue-209].
+No evidence-backed protocol command for restoring the signal is known, so this
+package does not emulate or guess one.
 
-1. Confirm the current package and keep its signed package file available for
-   rollback. For the initial test, the expected package is
-   `openlinkhub 0.8.8-3`.
+[issue-209]: https://github.com/jurkovic-nikola/OpenLinkHub/issues/209
+
+## Prepare the first installation
+
+Before switching from a distribution package:
+
+1. Record the current package and keep its signed package file for rollback.
 2. Stop the service and make a consistent backup of `/var/lib/openlinkhub`.
 3. Record the backup path.
 
-Example backup:
+Fish example:
 
-```sh
+```fish
 pacman -Q openlinkhub
 sudo pacman -Sw openlinkhub
 sudo systemctl disable --now openlinkhub
-backup="$HOME/openlinkhub-test-backup-$(date +%Y%m%d-%H%M%S)"
+set backup "$HOME/openlinkhub-test-backup-"(date +%Y%m%d-%H%M%S)
 mkdir -m 700 "$backup"
 sudo cp -a /var/lib/openlinkhub "$backup/"
 printf '%s\n' "$backup"
 ```
 
-## Install
+## Install and update
 
-Install explicitly:
+Install the test package explicitly:
 
-```sh
+```fish
 paru -S openlinkhub-xbox-test
 ```
 
-Pacman will report that `openlinkhub-xbox-test` conflicts with `openlinkhub`
-and ask whether `openlinkhub` may be removed. Confirm only that expected
-removal. The removal and installation then occur in one transaction.
+Pacman will report that `openlinkhub-xbox-test` conflicts with `openlinkhub`.
+Confirm only that expected removal. Removal and installation then occur in one
+transaction; do not uninstall `openlinkhub` separately.
 
 Start the service after the transaction:
 
-```sh
+```fish
 sudo systemctl enable --now openlinkhub
 systemctl --no-pager --full status openlinkhub
 ```
 
-Stop testing if the package transaction or service fails, unrelated devices
-regress, or audio and microphone operation change unexpectedly. Redact USB
-serial numbers before sharing logs or descriptors.
+Once installed, routine package updates use the normal command:
+
+```fish
+paru -Syu
+```
+
+Stop if a package transaction or service fails, unrelated devices regress, or
+audio and microphone operation change unexpectedly. Redact USB serial numbers
+before sharing logs or descriptors.
 
 ## Roll back
 
-Install the saved CachyOS package with `pacman -U`. Pacman will remove
+Install the saved distribution package or a previous test package with
+`pacman -U`. When returning to `openlinkhub`, Pacman removes
 `openlinkhub-xbox-test` as part of the same transaction. Do not remove the test
 package separately.
 
-```sh
-sudo pacman -U /path/to/openlinkhub-0.8.8-3-x86_64.pkg.tar.zst
+```fish
+sudo pacman -U /path/to/saved-package.pkg.tar.zst
 ```
 
-After the transaction, preserve the test state and restore the recorded
-pre-test backup. Set `backup` to the path printed during preparation:
+Preserve the current state before restoring the recorded pre-test backup. Set
+`backup` to the path printed during preparation:
 
-```sh
-backup=/path/recorded/during/preparation
+```fish
+set backup /path/recorded/during/preparation
 sudo mv /var/lib/openlinkhub \
-  "/var/lib/openlinkhub.after-test-$(date +%Y%m%d-%H%M%S)"
+  "/var/lib/openlinkhub.after-test-"(date +%Y%m%d-%H%M%S)
 sudo cp -a "$backup/openlinkhub" /var/lib/openlinkhub
 sudo systemctl enable --now openlinkhub
-pacman -Q openlinkhub
 ```
-
-The expected restored package for the initial test is `openlinkhub 0.8.8-3`.
