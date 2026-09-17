@@ -1,10 +1,10 @@
 pkgbase = xwaylandvideobridge
 	pkgdesc = Utility to allow streaming Wayland windows to X applications
-	pkgver = 0.5.2
+	pkgver = 0.5.3
 	pkgrel = 1
 	url = https://invent.kde.org/system/xwaylandvideobridge
 	arch = x86_64
-	license = LicenseRef-scancode-kde-accepted-gpl AND LGPL-2.0-or-later AND BSD-3-Clause
+	license = LicenseRef-scancode-kde-accepted-gpl AND LGPL-2.1-or-later AND BSD-3-Clause
 	makedepends = extra-cmake-modules
 	depends = gcc-libs
 	depends = glibc
@@ -20,7 +20,7 @@ pkgbase = xwaylandvideobridge
 	depends = qt6-base
 	depends = qt6-declarative
 	options = !debug
-	source = xwaylandvideobridge-0.5.2.tar.gz::https://invent.kde.org/system/xwaylandvideobridge/-/archive/v0.5.2/xwaylandvideobridge-v0.5.2.tar.gz
-	sha256sums = 7c2be7e3fe92c28a99cd3c16619c68098ab930f7683c1855a9ffc4535a8280c7
+	source = xwaylandvideobridge-0.5.3.tar.gz::https://invent.kde.org/system/xwaylandvideobridge/-/archive/v0.5.3/xwaylandvideobridge-v0.5.3.tar.gz
+	sha256sums = e5fa6546df19baa0a53bafdbdeb441eb080b7746eecf6f8e09b2c9b83133284a
 
 pkgname = xwaylandvideobridge
