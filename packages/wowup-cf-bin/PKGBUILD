@@ -3,7 +3,7 @@
 
 pkgname=wowup-cf-bin
 _pkgname=wowup-cf
-pkgver=2.23.1
+pkgver=2.24.0
 pkgrel=1
 epoch=1
 pkgdesc='World of Warcraft addon updater with CurseForge support'
@@ -51,7 +51,7 @@ source=(
 )
 noextract=("WowUp-CF-$pkgver.AppImage")
 sha256sums=(
-  '8d74c8fd24af4904dfd47b608ea6f4c55d578fd9dd70ad176b81f7edf139c7d9'
+  '69a479f1750103bf093e4f2db030fa03e80060991e2479721e261c443f29b420'
   '3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986'
 )
 

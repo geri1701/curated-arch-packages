@@ -1,6 +1,6 @@
 pkgbase = wowup-cf-bin
 	pkgdesc = World of Warcraft addon updater with CurseForge support
-	pkgver = 2.23.1
+	pkgver = 2.24.0
 	pkgrel = 1
 	epoch = 1
 	url = https://github.com/WowUp/WowUp.CF
@@ -36,12 +36,12 @@ pkgbase = wowup-cf-bin
 	optdepends = libsecret: keyring support
 	provides = wowup-cf
 	conflicts = wowup-cf
-	noextract = WowUp-CF-2.23.1.AppImage
+	noextract = WowUp-CF-2.24.0.AppImage
 	options = !strip
 	options = !debug
-	source = WowUp-CF-2.23.1.AppImage::https://github.com/WowUp/WowUp.CF/releases/download/v2.23.1/WowUp-CF-2.23.1.AppImage
-	source = LICENSE-2.23.1::https://github.com/WowUp/WowUp.CF/raw/v2.23.1/LICENSE
-	sha256sums = 8d74c8fd24af4904dfd47b608ea6f4c55d578fd9dd70ad176b81f7edf139c7d9
+	source = WowUp-CF-2.24.0.AppImage::https://github.com/WowUp/WowUp.CF/releases/download/v2.24.0/WowUp-CF-2.24.0.AppImage
+	source = LICENSE-2.24.0::https://github.com/WowUp/WowUp.CF/raw/v2.24.0/LICENSE
+	sha256sums = 69a479f1750103bf093e4f2db030fa03e80060991e2479721e261c443f29b420
 	sha256sums = 3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986
 
 pkgname = wowup-cf-bin
