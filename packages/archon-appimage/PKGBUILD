@@ -2,7 +2,7 @@
 
 pkgname=archon-appimage
 _pkgname=archon
-pkgver=9.6.158
+pkgver=9.6.260
 pkgrel=1
 pkgdesc="Desktop uploader app for Archon packaged from the upstream AppImage"
 arch=('x86_64')
@@ -44,7 +44,7 @@ source=(
 )
 noextract=("$_pkgname-v$pkgver.AppImage")
 sha256sums=(
-  'de1821d06f7c660cc57a059d750506f8e8cb5fdb1b6ee969a8a06f017cf1489f'
+  'b21ceef51abeb350d4cac3c5fceb99aca8eda9635d8d0059ec68871dee9ee396'
   'cadbf0f4936c1a5b4497683b59f49f09efd2c7ab6cff3eaf5615b42200ae9b9d'
 )
 
