@@ -1,6 +1,6 @@
 pkgbase = wago-app-bin
 	pkgdesc = Wago addon and WeakAura manager packaged from the upstream AppImage
-	pkgver = 2.14.1
+	pkgver = 3.0.2
 	pkgrel = 1
 	url = https://addons.wago.io/
 	arch = x86_64
@@ -36,12 +36,12 @@ pkgbase = wago-app-bin
 	optdepends = libayatana-appindicator: tray icon support
 	provides = wago-app
 	conflicts = wago-app
-	noextract = WagoApp-2.14.1.AppImage
+	noextract = WagoApp-3.0.2.AppImage
 	options = !strip
 	options = !debug
-	source = WagoApp-2.14.1.AppImage::https://cdn.wago.io/wagoapp/WagoApp_2.14.1.AppImage
+	source = WagoApp-3.0.2.AppImage::https://cdn.wago.io/wagoapp/WagoApp_3.0.2.AppImage
 	source = LICENSE
-	sha256sums = 4145d4c05ad5dd8b2fdd064927c414bcff1145a891eb6cf0dd2d2c5d11ad186e
+	sha256sums = 345bf2bc38c04cd5d4f922e8770bf1899aa718aa8f6d50bf92af6ce7bdd31d42
 	sha256sums = 31a4e7c58f5c5b8c0e9c17aa3fd531894a84102b927919961dd2b05e77835cca
 
 pkgname = wago-app-bin

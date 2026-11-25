@@ -2,7 +2,7 @@
 
 pkgname=wago-app-bin
 _pkgname=WagoApp
-pkgver=2.14.1
+pkgver=3.0.2
 pkgrel=1
 pkgdesc='Wago addon and WeakAura manager packaged from the upstream AppImage'
 arch=('x86_64')
@@ -48,7 +48,7 @@ source=(
 )
 noextract=("$_pkgname-$pkgver.AppImage")
 sha256sums=(
-  '4145d4c05ad5dd8b2fdd064927c414bcff1145a891eb6cf0dd2d2c5d11ad186e'
+  '345bf2bc38c04cd5d4f922e8770bf1899aa718aa8f6d50bf92af6ce7bdd31d42'
   '31a4e7c58f5c5b8c0e9c17aa3fd531894a84102b927919961dd2b05e77835cca'
 )
 
